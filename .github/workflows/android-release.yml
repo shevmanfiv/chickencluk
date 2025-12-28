@@ -1,0 +1,176 @@
+# ============================================================
+# CLUCK RUSH - Android Release Build Workflow
+# ============================================================
+# This workflow builds signed APK and AAB on every push.
+# Keystore is decoded from GitHub Secrets at runtime.
+# No secrets are ever printed or exposed in logs.
+# ============================================================
+
+name: Android Release Build
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - release/*
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    # Allows manual triggering from the Actions tab
+
+env:
+  FLUTTER_VERSION: '3.38.5'
+  JAVA_VERSION: '17'
+
+jobs:
+  build:
+    name: Build Signed APK & AAB
+    runs-on: ubuntu-latest
+    
+    steps:
+      # ========================================
+      # CHECKOUT CODE
+      # ========================================
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ========================================
+      # SETUP JAVA
+      # ========================================
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      # ========================================
+      # SETUP FLUTTER
+      # ========================================
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      # ========================================
+      # VERIFY FLUTTER INSTALLATION
+      # ========================================
+      - name: Verify Flutter installation
+        run: |
+          flutter --version
+          flutter doctor -v
+
+      # ========================================
+      # GET DEPENDENCIES
+      # ========================================
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      # ========================================
+      # DECODE KEYSTORE FROM SECRETS
+      # Decodes base64 keystore and creates key.properties
+      # NEVER prints or exposes secret values
+      # ========================================
+      - name: Decode Keystore
+        env:
+          NURA_KEYSTORE_BASE64: ${{ secrets.NURA_KEYSTORE_BASE64 }}
+          NURA_KEYSTORE_PASSWORD: ${{ secrets.NURA_KEYSTORE_PASSWORD }}
+          NURA_KEY_ALIAS: ${{ secrets.NURA_KEY_ALIAS }}
+          NURA_KEY_PASSWORD: ${{ secrets.NURA_KEY_PASSWORD }}
+        run: |
+          # Decode keystore from base64
+          echo "$NURA_KEYSTORE_BASE64" | base64 --decode > android/app/release-keystore.jks
+          
+          # Verify keystore was created (without exposing contents)
+          if [ -f android/app/release-keystore.jks ]; then
+            echo "✅ Keystore decoded successfully"
+            echo "📦 Keystore size: $(stat -c%s android/app/release-keystore.jks) bytes"
+          else
+            echo "❌ Failed to decode keystore"
+            exit 1
+          fi
+          
+          # Create key.properties file
+          cat > android/key.properties << EOF
+          storePassword=$NURA_KEYSTORE_PASSWORD
+          keyPassword=$NURA_KEY_PASSWORD
+          keyAlias=$NURA_KEY_ALIAS
+          storeFile=release-keystore.jks
+          EOF
+          
+          echo "✅ key.properties created successfully"
+
+      # ========================================
+      # BUILD RELEASE APK
+      # ========================================
+      - name: Build Release APK
+        run: |
+          flutter build apk --release --split-per-abi
+          echo "✅ APK build completed"
+
+      # ========================================
+      # BUILD RELEASE AAB (App Bundle)
+      # ========================================
+      - name: Build Release AAB
+        run: |
+          flutter build appbundle --release
+          echo "✅ AAB build completed"
+
+      # ========================================
+      # CLEANUP SENSITIVE FILES
+      # Removes keystore and key.properties after build
+      # ========================================
+      - name: Cleanup sensitive files
+        if: always()
+        run: |
+          rm -f android/app/release-keystore.jks
+          rm -f android/key.properties
+          echo "🧹 Sensitive files cleaned up"
+
+      # ========================================
+      # UPLOAD APK ARTIFACTS
+      # ========================================
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cluck-rush-apk-${{ github.sha }}
+          path: |
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
+          retention-days: 30
+          if-no-files-found: error
+
+      # ========================================
+      # UPLOAD AAB ARTIFACT
+      # ========================================
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cluck-rush-aab-${{ github.sha }}
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+          if-no-files-found: error
+
+      # ========================================
+      # BUILD SUMMARY
+      # ========================================
+      - name: Build Summary
+        run: |
+          echo "============================================"
+          echo "🎉 BUILD COMPLETED SUCCESSFULLY"
+          echo "============================================"
+          echo ""
+          echo "📱 APK Files:"
+          ls -lh build/app/outputs/flutter-apk/*.apk 2>/dev/null || echo "  No APK files found"
+          echo ""
+          echo "📦 AAB File:"
+          ls -lh build/app/outputs/bundle/release/*.aab 2>/dev/null || echo "  No AAB files found"
+          echo ""
+          echo "============================================"
+

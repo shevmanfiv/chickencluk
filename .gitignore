@@ -1,0 +1,220 @@
+# ============================================
+# CLUCK RUSH - COMPREHENSIVE .GITIGNORE
+# Optimized for privacy and clean GitHub pushes
+# ============================================
+
+# ============================================
+# PERSONAL/SYSTEM INFORMATION FILES (CRITICAL)
+# These files contain local paths with usernames
+# ============================================
+
+# Android local properties - Contains SDK path with username
+android/local.properties
+
+# iOS Flutter generated configs - Contains local paths
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/ephemeral/
+
+# Flutter plugin dependencies - Contains full local paths
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Dart tool folder - Contains package_config.json with local paths
+.dart_tool/
+
+# ============================================
+# IDE / EDITOR FILES (May contain system info)
+# ============================================
+
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+
+# Xcode user data
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# JetBrains
+.idea/
+*.iml
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.#*
+
+# ============================================
+# BUILD ARTIFACTS & GENERATED FILES
+# ============================================
+
+# Flutter/Dart build
+/build/
+**/build/
+
+# Android build artifacts
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+/android/.gradle/
+/android/captures/
+/android/gradlew
+/android/gradlew.bat
+*.apk
+*.aab
+*.jks
+*.keystore
+
+# iOS build artifacts
+/ios/Pods/
+/ios/.symlinks/
+/ios/Flutter/Flutter.framework/
+/ios/Flutter/Flutter.podspec
+/ios/ServiceDefinitions.json
+/ios/Runner/GeneratedPluginRegistrant.h
+/ios/Runner/GeneratedPluginRegistrant.m
+ios/Podfile.lock
+
+# Web build
+/web/favicon.png
+/web/icons/
+
+# Coverage
+/coverage/
+
+# ============================================
+# DART/PUB CACHE & DEPENDENCIES
+# ============================================
+
+# Pub related
+.pub-cache/
+.pub/
+pubspec.lock
+
+# Doc generation
+**/doc/api/
+.dartdoc_tool/
+
+# ============================================
+# MISCELLANEOUS SYSTEM FILES
+# ============================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ============================================
+# LOGS & TEMPORARY FILES
+# ============================================
+
+*.log
+*.tmp
+*.temp
+*.bak
+*.class
+*.pyc
+*.pyo
+
+# ============================================
+# FLUTTER SPECIFIC
+# ============================================
+
+# Flutter last build ID
+**/ios/Flutter/.last_build_id
+
+# Symbolication
+app.*.symbols
+
+# Obfuscation
+app.*.map.json
+
+# ============================================
+# VERSION CONTROL & MIGRATION
+# ============================================
+
+.svn/
+.hg/
+.history
+migrate_working_dir/
+.buildlog/
+.build/
+
+# ============================================
+# SECRETS & SENSITIVE DATA (Extra Protection)
+# ============================================
+
+# API keys and secrets
+*.env
+.env.*
+secrets.json
+secrets.yaml
+google-services.json
+GoogleService-Info.plist
+
+# documentation
+documentation/
+
+# Signing keys (never commit these!)
+*.jks
+*.keystore
+*.p12
+*.key
+*.pem
+key.properties
+android/key.properties
+
+# ============================================
+# CI/CD & KEYSTORE GENERATION
+# ============================================
+
+# Keystore files (NEVER commit!)
+release-keystore.jks
+keystore-base64.txt
+*.b64
+
+# Temporary CI/CD files
+android/app/release-keystore.jks
+
+# ============================================
+# ATOM & OTHER EDITORS
+# ============================================
+
+.atom/
+.swiftpm/
